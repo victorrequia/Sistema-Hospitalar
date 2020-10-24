@@ -12,56 +12,60 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-public class PacienteDAO implements DAO<Paciente>{
-    private final Connection conexao;
+public class PacienteDAO implements DAO<Paciente> {
+    private Connection conexao;
     private static PacienteDAO instance = null;
-    
-    private PacienteDAO() throws ClassNotFoundException, SQLException{
-        conexao = Conexao.getConexao();
-        selectNewId = conexao.prepareStatement(selectNewIdString);
-        sqlInsert = conexao.prepareStatement(sqlInsertString);
-        sqlAlterar = conexao.prepareStatement(sqlAlterarString);
-        sqlRemover = conexao.prepareStatement(sqlRemoverString);
-        sqlBuscarAll = conexao.prepareStatement(sqlBuscarAllString);
-        sqlBuscar = conexao.prepareStatement(sqlBuscarString);
+
+    private PacienteDAO() throws ClassNotFoundException, SQLException {
+        try {
+            conexao = Conexao.getConexao();
+            selectNewId = conexao.prepareStatement(selectNewIdString);
+            sqlInsert = conexao.prepareStatement(sqlInsertString);
+            sqlAlterar = conexao.prepareStatement(sqlAlterarString);
+            sqlRemover = conexao.prepareStatement(sqlRemoverString);
+            sqlBuscarAll = conexao.prepareStatement(sqlBuscarAllString);
+            sqlBuscar = conexao.prepareStatement(sqlBuscarString);
+        } catch (Exception e) {
+            System.err.println(e);
+        }
     };
-    
-    public static PacienteDAO getInstance() throws ClassNotFoundException, SQLException{
-        if(instance == null){
+
+    public static PacienteDAO getInstance() throws ClassNotFoundException, SQLException {
+        if (instance == null) {
             instance = new PacienteDAO();
         }
         return instance;
     }
-    
-    private final PreparedStatement selectNewId;
+
+    private PreparedStatement selectNewId;
     private final String selectNewIdString = "select nextval('id_paciente')";
-    private final PreparedStatement sqlInsert; 
+    private PreparedStatement sqlInsert;
     private final String sqlInsertString = "insert into paciente (id,nome,cidade,descricao,cpf,idade) values (?,?,?,?,?,?)";
-    private final PreparedStatement sqlAlterar;
+    private PreparedStatement sqlAlterar;
     private final String sqlAlterarString = "update paciente set nome = ?,cidade = ?,descricao = ?,cpf = ?,idade = ? where id = ?";
-    private final PreparedStatement sqlRemover;
+    private PreparedStatement sqlRemover;
     private final String sqlRemoverString = "delete from paciente where id = ?";
-    private final PreparedStatement sqlBuscarAll;
+    private PreparedStatement sqlBuscarAll;
     private final String sqlBuscarAllString = "select * from paciente";
-    private final PreparedStatement sqlBuscar;
+    private PreparedStatement sqlBuscar;
     private final String sqlBuscarString = "select * from paciente where id = ?";
-    
+
     @Override
-    public int selectNewId() throws FalhaBuscarException{
-        try{
+    public int selectNewId() throws FalhaBuscarException {
+        try {
             ResultSet rs = selectNewId.executeQuery();
-            if(rs.next()){
+            if (rs.next()) {
                 return rs.getInt(1);
             }
-        }catch(SQLException e){
+        } catch (SQLException e) {
             throw new FalhaBuscarException("Erro ao selecionar novo id para o paciente!");
         }
         return 0;
     }
-    
+
     @Override
     public boolean cadastrar(Paciente objeto) throws FalhaInserirException, FalhaBuscarException {
-        try{
+        try {
             objeto.setId(selectNewId());
             sqlInsert.setInt(1, objeto.getId());
             sqlInsert.setString(2, objeto.getNome());
@@ -70,7 +74,7 @@ public class PacienteDAO implements DAO<Paciente>{
             sqlInsert.setString(5, objeto.getCpf());
             sqlInsert.setInt(6, objeto.getIdade());
             sqlInsert.executeUpdate();
-        }catch(SQLException e){
+        } catch (SQLException e) {
             throw new FalhaInserirException("Erro ao cadastrar paciente!");
         }
         return true;
@@ -78,7 +82,7 @@ public class PacienteDAO implements DAO<Paciente>{
 
     @Override
     public boolean alterar(Paciente objeto) throws FalhaAlterarException {
-        try{    
+        try {
             sqlAlterar.setString(1, objeto.getNome());
             sqlAlterar.setString(2, objeto.getCidade());
             sqlAlterar.setString(3, objeto.getDescricao());
@@ -86,7 +90,7 @@ public class PacienteDAO implements DAO<Paciente>{
             sqlAlterar.setInt(5, objeto.getIdade());
             sqlAlterar.setInt(6, objeto.getId());
             sqlAlterar.executeUpdate();
-        }catch(SQLException e){
+        } catch (SQLException e) {
             throw new FalhaAlterarException("Falha ao alterar paciente!");
         }
         return true;
@@ -94,11 +98,11 @@ public class PacienteDAO implements DAO<Paciente>{
 
     @Override
     public boolean remover(Paciente objeto) throws FalhaRemoverException {
-        
-        try{
+
+        try {
             sqlRemover.setInt(1, objeto.getId());
             sqlRemover.executeUpdate();
-        }catch(SQLException e){
+        } catch (SQLException e) {
             throw new FalhaRemoverException("Falha ao remover paciente!");
         }
         return true;
@@ -107,30 +111,9 @@ public class PacienteDAO implements DAO<Paciente>{
     @Override
     public List<Paciente> buscarAll() throws FalhaBuscarException {
         List<Paciente> pacientes = new LinkedList();
-        try{
+        try {
             ResultSet rs = sqlBuscarAll.executeQuery();
-            while(rs.next()){
-                int id = rs.getInt(1);
-                String nome = rs.getString(2);
-                String cidade = rs.getString(3);
-                String descricao = rs.getString(4);
-                String cpf = rs.getString(5);
-                int idade = rs.getInt(6);
-                
-                Paciente paciente = new Paciente(id,nome,cidade,descricao,cpf,idade);
-                pacientes.add(paciente);
-            }
-        }catch(SQLException e){
-            throw new FalhaBuscarException("Falha ao buscar pacientes!");
-        }
-        return pacientes;
-    }   
-    
-    public Paciente sqlBuscar(int id_medico) throws FalhaBuscarException{
-        try{
-            sqlBuscar.setInt(1, id_medico);
-            ResultSet rs = sqlBuscar.executeQuery();
-            if(rs.next()){
+            while (rs.next()) {
                 int id = rs.getInt(1);
                 String nome = rs.getString(2);
                 String cidade = rs.getString(3);
@@ -138,12 +121,33 @@ public class PacienteDAO implements DAO<Paciente>{
                 String cpf = rs.getString(5);
                 int idade = rs.getInt(6);
 
-                Paciente p = new Paciente(id,nome,cidade,descricao,cpf,idade);
+                Paciente paciente = new Paciente(id, nome, cidade, descricao, cpf, idade);
+                pacientes.add(paciente);
+            }
+        } catch (SQLException e) {
+            throw new FalhaBuscarException("Falha ao buscar pacientes!");
+        }
+        return pacientes;
+    }
+
+    public Paciente sqlBuscar(int id_medico) throws FalhaBuscarException {
+        try {
+            sqlBuscar.setInt(1, id_medico);
+            ResultSet rs = sqlBuscar.executeQuery();
+            if (rs.next()) {
+                int id = rs.getInt(1);
+                String nome = rs.getString(2);
+                String cidade = rs.getString(3);
+                String descricao = rs.getString(4);
+                String cpf = rs.getString(5);
+                int idade = rs.getInt(6);
+
+                Paciente p = new Paciente(id, nome, cidade, descricao, cpf, idade);
                 return p;
-            }else{
+            } else {
                 throw new FalhaBuscarException("Paciente nao encontrado!");
             }
-        }catch(SQLException e){
+        } catch (SQLException e) {
             throw new FalhaBuscarException("Falha ao buscar paciente!");
         }
     }
