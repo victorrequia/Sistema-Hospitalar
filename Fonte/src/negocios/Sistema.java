@@ -29,7 +29,7 @@ public class Sistema {
 
     private Sistema() throws ClassNotFoundException, SQLException {
         try {
-            Conexao.setSenha("564934");
+            Conexao.setSenha("senha banco de dados");
             conexao = Conexao.getConexao();
             medicodao = MedicoDAO.getInstance();
             pacientedao = PacienteDAO.getInstance();
