@@ -1,5 +1,3 @@
-![](Trabalho-Final-POO.gif)
-
 # Resumo
 Trabalho final da disciplina de POO (Programação orientada a objetos) da Udesc/CCT, desenvolvido pelo aluno Victor Eduardo Requia com o auxilio do monitor da disciplina Vinicius Takeo
 e o professor Fabiano Baldo
@@ -20,3 +18,4 @@ senha.equals("123") para (senha.equals("Sua senha") e para mudar o usuario alter
 * Para mudar o nome da database e porta, vá até a classe Conexao.java e na função getConexao modifique String url = "jdbc:postgresql://localhost:5432/consultorio"
 para String url = "jdbc:postgresql://localhost:Sua porta de acesso ao banco/Seu nome de databse"
 
+![](Trabalho-Final-POO.gif)
